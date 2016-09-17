@@ -3157,6 +3157,7 @@ In 64 bit mode, the following additional registers are used:
 */
 
 // Called by out
+/*
 static int flush1(ZPAQL* z) {
   try {
     z->flush();
@@ -3169,7 +3170,10 @@ static int flush1(ZPAQL* z) {
     return 3;
   }
 }
-
+*/
+static void flush1(ZPAQL* z) {
+	z->flush();
+}
 // return true if op is an undefined ZPAQL instruction
 static bool iserr(int op) {
   return op==0 || (op>=120 && op<=127) || (op>=240 && op<=254)
@@ -4601,7 +4605,9 @@ int Predictor::predict() {
       error("run JIT failed");
   }
   assert(pcode && pcode[0]);
-  return ((int(*)(Predictor*))&pcode[10])(this);
+
+  typedef int(__cdecl *pcode_ptr)(Predictor*);
+  return ((pcode_ptr)&pcode[10])(this); // call
 #endif
 }
 
@@ -4612,7 +4618,8 @@ void Predictor::update(int y) {
   update0(y);
 #else
   assert(pcode && pcode[5]);
-  ((void(*)(Predictor*, int))&pcode[5])(this, y);
+  typedef void(__cdecl *pcode_ptr)(Predictor*, int);
+  ((pcode_ptr)&pcode[5])(this, y); // call
 
   // Save bit y in c8, hmap4 (not implemented in JIT)
   c8+=c8+y;
@@ -4646,7 +4653,8 @@ void ZPAQL::run(U32 input) {
       error("run JIT failed");
   }
   a=input;
-  const U32 rc=((int(*)())(&rcode[0]))();
+  typedef int(__cdecl *rcode_ptr)();
+  const U32 rc=((rcode_ptr)(&rcode[0]))(); // call
   if (rc==0) return;
   else if (rc==1) libzpaq::error("Bad ZPAQL opcode");
   else if (rc==2) libzpaq::error("Out of memory");

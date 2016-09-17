@@ -1,10 +1,22 @@
 #include <stdio.h> 
 #include <windows.h> 
 #include <wininet.h> 
+#pragma comment (lib, "wininet.lib")
 
-#pragma comment (lib, "wininet.lib") 
+#include "pngpacket.h"
+
+int main(int argc, char* argv[]) 
+{
+	ReadPNG png;
+	png.read("new2.png");
+	return 0;
+}
 
 
+
+
+
+/*
 char buffer[4096];
 
 int main()
@@ -14,13 +26,14 @@ int main()
 	hURL = InternetOpenUrlA(hOpen, "http://www.google.com", NULL, 0, INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE, 0);
 
 	DWORD read;
-	FILE* fp = fopen("whatever.txt", "wb"); /* Added */
+	FILE* fp = fopen("whatever.txt", "wb");
 	do
 	{
-		InternetReadFile(hURL, buffer, sizeof(buffer), &read);
+		if (InternetReadFile(hURL, buffer, sizeof(buffer), &read) && (read == 0)) break;
 		fwrite(buffer, 1, read, fp);
-	} while (read == sizeof(buffer));
-	fclose(fp);  /* Added */
+	} while (1);
+	fclose(fp);
 
 	return 0;
 }
+*/
